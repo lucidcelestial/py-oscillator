@@ -1,5 +1,3 @@
-# this whole thing needs cleanup ignore the current state of it
-
 import numpy as np
 import sounddevice as sd
 
@@ -45,8 +43,11 @@ def generate(freq, callback):
     return newchunk.astype(np.float32)
 
 
-for chunk in range(1024 * 16):
-    final = generate(110, saw_callback)
+freq = 300
+
+
+while True:
+    final = generate(freq, saw_callback)
     stream.write(final)
 
 stream.stop()
