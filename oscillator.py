@@ -12,6 +12,9 @@ class Oscillator:
     def set_freq(self, ω):
         self.ω = ω
 
+    def set_wave(self, wave):
+        self.wave = self.get_callback(wave)
+
     def get_callback(self, wave):
         π = np.pi
 
@@ -24,10 +27,10 @@ class Oscillator:
                     lambda ϕ: 1-2*np.arccos(np.sin(ϕ))/π
             case Wave.SAW:
                 return \
-                    lambda ϕ: (1-2*np.arccos(np.sin(ϕ/2+(π/2)))/π)*(1/np.arctan(1/0.005))*np.arctan(np.sin(ϕ/2)/0.005)
+                    lambda ϕ: (1-2*np.arccos(np.sin(ϕ/2+(π/2)))/π)*(1/np.arctan(1/0.01))*np.arctan(np.sin(ϕ/2)/0.01)
             case Wave.SQUARE:
                 return \
-                    lambda ϕ: (1/np.arctan(1/0.005))*np.arctan(np.sin(ϕ)/0.005)
+                    lambda ϕ: (1/np.arctan(1/0.01))*np.arctan(np.sin(ϕ)/0.01)
 
     def nextSample(self):
         π = np.pi
