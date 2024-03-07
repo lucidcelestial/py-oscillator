@@ -2,10 +2,12 @@ import numpy as np
 from wave import Wave
 
 
+# generates the actual values for each sample
 class Oscillator:
     def __init__(self, sample_rate, wave):
-        self.ϕ = 0
-        self.ω = 0
+        self.ϕ = 0  # phase
+        self.ω = 0  # frequency
+        self.π = np.pi
         self.fs = sample_rate
         self.wave = self.get_callback(wave)
 
@@ -15,29 +17,28 @@ class Oscillator:
     def set_wave(self, wave):
         self.wave = self.get_callback(wave)
 
+    # retrieve the formula callback for the corresponding wave selection
     def get_callback(self, wave):
-        π = np.pi
-
         match wave:
             case Wave.SINE:
                 return \
                     lambda ϕ: np.sin(ϕ)
             case Wave.TRI:
                 return \
-                    lambda ϕ: 1-2*np.arccos(np.sin(ϕ))/π
+                    lambda ϕ: 1 - 2 * np.arccos(np.sin(ϕ)) / self.π
             case Wave.SAW:
                 return \
-                    lambda ϕ: (1-2*np.arccos(np.sin(ϕ/2+(π/2)))/π)*(1/np.arctan(1/0.01))*np.arctan(np.sin(ϕ/2)/0.01)
+                    lambda ϕ: ((1 - 2 * np.arccos(np.sin(ϕ / 2 + (self.π / 2))) / self.π) *
+                               (1 / np.arctan(1 / 0.01)) * np.arctan(np.sin(ϕ / 2) / 0.01))
             case Wave.SQUARE:
                 return \
-                    lambda ϕ: (1/np.arctan(1/0.01))*np.arctan(np.sin(ϕ)/0.01)
+                    lambda ϕ: (1 / np.arctan(1 / 0.01)) * np.arctan(np.sin(ϕ) / 0.01)
 
+    # advance the phase store rotation and generate the next sample using the callback
     def nextSample(self):
-        π = np.pi
+        self.ϕ += 2 * self.π * self.ω / self.fs
 
-        self.ϕ += 2 * π * self.ω / self.fs
-
-        if self.ϕ > 2 * π:
-            self.ϕ -= 2 * π
+        if self.ϕ > 2 * self.π:
+            self.ϕ -= 2 * self.π
 
         return self.wave(self.ϕ)

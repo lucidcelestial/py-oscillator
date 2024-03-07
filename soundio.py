@@ -6,17 +6,19 @@ from wave import Wave
 from notefrequency import freq
 from oscillator import Oscillator
 
-BLOCK_SIZE = 8
-SAMPLE_RATE = 44100
 
-
+# handles the keyboard inputs and output stream with the blocks that get written to it
 class IO:
-    def __init__(self):
+    def __init__(self, block_size, sample_rate):
         self.octave = 3
         self.gate = None
+
+        self.block_size = block_size
+        self.sample_rate = sample_rate
+
         self.listener = keyboard.Listener(on_press=self.keydown, on_release=self.keyup)
-        self.stream = sd.OutputStream(SAMPLE_RATE, BLOCK_SIZE, channels=1, dtype="float32")
-        self.oscillator = Oscillator(SAMPLE_RATE, Wave.SINE)
+        self.stream = sd.OutputStream(sample_rate, block_size, channels=1, dtype="float32")
+        self.oscillator = Oscillator(sample_rate, Wave.SINE)
         self.start()
 
     def keydown(self, key):
@@ -44,14 +46,16 @@ class IO:
         except AttributeError:
             return
 
+    # generate the next block of samples
     def next_block(self):
-        block = np.zeros(BLOCK_SIZE)
+        block = np.zeros(self.block_size)
 
-        for i in range(0, BLOCK_SIZE):
+        for i in range(0, self.block_size):
             block[i] = self.oscillator.nextSample()
 
         return block.astype(np.float32)
 
+    # main output loop
     def start(self):
         self.stream.start()
         self.listener.start()
@@ -63,6 +67,3 @@ class IO:
         except KeyboardInterrupt:
             self.stream.stop()
             self.listener.stop()
-
-
-io = IO()
